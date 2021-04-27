@@ -5,7 +5,7 @@ class ShakeListener extends StatefulWidget {
   final Function(BuildContext) listener;
   final Widget child;
 
-  ShakeListener({@required this.listener, @required this.child});
+  ShakeListener({required this.listener, required this.child});
 
   @override
   _ShakeListenerState createState() {
@@ -15,7 +15,7 @@ class ShakeListener extends StatefulWidget {
 
 class _ShakeListenerState extends State<ShakeListener> {
   final Function(BuildContext) _listener;
-  ShakeDetector _shakeDetector;
+  late ShakeDetector _shakeDetector;
 
   _ShakeListenerState(this._listener) {
     _shakeDetector = ShakeDetector(() => _listener.call(context));

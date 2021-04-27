@@ -7,7 +7,7 @@ class FlappyFeedback extends StatelessWidget {
   final Widget child;
   final Function(BuildContext context) listener;
 
-  FlappyFeedback({this.listener, this.child});
+  FlappyFeedback({required this.listener, required this.child});
   @override
   Widget build(BuildContext context) {
     return Container(

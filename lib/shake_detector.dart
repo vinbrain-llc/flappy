@@ -27,7 +27,7 @@ class ShakeDetector {
   final Function listener;
 
   /// StreamSubscription for Accelerometer events
-  StreamSubscription streamSubscription;
+  late StreamSubscription streamSubscription;
 
   /// Starts listening for shakes on devices with appropriate hardware.
   ShakeDetector(this.listener) {
@@ -82,8 +82,8 @@ class _SampleQueue {
 
   final pool = _SamplePool();
 
-  _Sample _oldest;
-  _Sample _newest;
+  _Sample? _oldest;
+  _Sample? _newest;
   var _sampleCount = 0;
   var _acceleratingCount = 0;
 
@@ -101,7 +101,7 @@ class _SampleQueue {
     added._accelerating = accelerating;
     added._next = null;
     if (_newest != null) {
-      _newest._next = added;
+      _newest!._next = added;
     }
     _newest = added;
     if (_oldest == null) {
@@ -118,7 +118,7 @@ class _SampleQueue {
   /// Removes all samples from this queue. */
   void _clear() {
     while (_oldest != null) {
-      _Sample removed = _oldest;
+      _Sample removed = _oldest!;
       _oldest = removed._next;
       pool._release(removed);
     }
@@ -131,10 +131,10 @@ class _SampleQueue {
   void _purge(int cutoff) {
     while (_sampleCount >= _minQueueSize &&
         _oldest != null &&
-        cutoff - _oldest._timestamp > 0) {
+        cutoff - _oldest!._timestamp! > 0) {
       // Remove sample.
-      _Sample removed = _oldest;
-      if (removed._accelerating) {
+      _Sample removed = _oldest!;
+      if (removed._accelerating!) {
         _acceleratingCount--;
       }
       _sampleCount--;
@@ -152,7 +152,7 @@ class _SampleQueue {
   bool _isShaking() {
     return _newest != null &&
         _oldest != null &&
-        _newest._timestamp - _oldest._timestamp >= _minWindowSize &&
+        _newest!._timestamp! - _oldest!._timestamp! >= _minWindowSize &&
         _acceleratingCount >= (_sampleCount >> 1) + (_sampleCount >> 2);
   }
 }
@@ -160,22 +160,22 @@ class _SampleQueue {
 /// An accelerometer sample. */
 class _Sample {
   /// Time sample was taken. */
-  int _timestamp;
+  int? _timestamp;
 
   /// If acceleration > {@link #accelerationThreshold}. */
-  bool _accelerating;
+  bool? _accelerating;
 
   /// Next sample in the queue or pool. */
-  _Sample _next;
+  _Sample? _next;
 }
 
 /// Pools samples. Avoids garbage collection. */
 class _SamplePool {
-  _Sample _head;
+  _Sample? _head;
 
   /// Acquires a sample from the pool. */
   _Sample _acquire() {
-    _Sample acquired = _head;
+    _Sample? acquired = _head;
     if (acquired == null) {
       acquired = _Sample();
     } else {
