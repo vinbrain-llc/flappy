@@ -1,8 +1,8 @@
 name: flappy
 description: A new Flutter package project.
 version: 0.0.1
-author:
-homepage:
+author: Nguyen Viet My<zzvietmyzz@gmail.com>
+homepage: https://github.com/vietmy1711/flappy.git
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  feedback: ^1.2.1
+  sensors: ^2.0.0
 
 dev_dependencies:
   flutter_test:
