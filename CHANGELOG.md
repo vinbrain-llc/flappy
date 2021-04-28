@@ -1,3 +1,3 @@
-## [0.0.1] - TODO: Add release date.
+## [0.1.0] - 28/04/2021
 
-* TODO: Describe initial release.
+- Feature: shake to open feedback, automatic logging.
