@@ -1,3 +1,7 @@
+## [0.1.4] - 28/04/2021
+
+- Enhancement: Reuse file when not reaching maximum size.
+
 ## [0.1.3] - 28/04/2021
 
 - Bug fix: Enable logging in release mode.

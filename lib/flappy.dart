@@ -3,7 +3,6 @@ library flappy;
 import 'dart:developer';
 import 'dart:io';
 import 'package:csv/csv.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:feedback/feedback.dart';
@@ -78,16 +77,14 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
     await FlutterEmailSender.send(email);
   }
 
-  void _initLog() {
-    var fileName = DateTime.now().millisecondsSinceEpoch.toString();
+  void _initLog() async {
     _prepareFiles();
-    _setupFirstRow(fileName);
+    var fileName = await _getLatestFile();
     hierarchicalLoggingEnabled = true;
     Logger.root.onRecord.listen((record) async {
       final file = await _getLocalFile(fileName);
       if (await file.length() > widget.maximumFileSize) {
-        fileName = DateTime.now().millisecondsSinceEpoch.toString();
-        _setupFirstRow(fileName);
+        fileName = await _getLatestFile();
       }
       await _logRecord(record, fileName);
       if (widget.consoleLog) {
@@ -101,6 +98,29 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
         );
       }
     });
+  }
+
+  Future<String> _getLatestFile() async {
+    final localPath = await _localPath;
+    final dir = Directory('$localPath/logs');
+    var dirExist = await dir.exists();
+    if (!dirExist) {
+      await dir.create();
+    }
+    final files = await dir.list().toList();
+    var name = '';
+
+    if (files.isNotEmpty) {
+      files.sort((a, b) => b.path.compareTo(a.path));
+      name = p.basename(files.first.path);
+    } else {
+      final newFileName =
+          '${DateTime.now().millisecondsSinceEpoch.toString()}.csv';
+      name = newFileName;
+      _setupFirstRow(newFileName);
+    }
+
+    return name;
   }
 
   void _setupFirstRow(String fileName) async {
