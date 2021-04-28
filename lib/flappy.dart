@@ -2,6 +2,7 @@ library flappy;
 
 import 'dart:developer';
 import 'dart:io';
+import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -76,12 +77,14 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
   void _initLog() {
     var fileName = DateTime.now().millisecondsSinceEpoch.toString();
     _prepareFiles();
+    _setupFirstRow(fileName);
     Logger.root.level = kDebugMode ? Level.ALL : Level.OFF;
     hierarchicalLoggingEnabled = true;
     Logger.root.onRecord.listen((record) async {
       final file = await _getLocalFile(fileName);
       if (await file.length() > widget.maximumFileSize) {
         fileName = DateTime.now().millisecondsSinceEpoch.toString();
+        _setupFirstRow(fileName);
       }
       await _logRecord(record, fileName);
       log(
@@ -95,6 +98,14 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
     });
   }
 
+  void _setupFirstRow(String fileName) async {
+    final file = await _getLocalFile(fileName);
+    String csvData = ListToCsvConverter().convert([
+      ['Message', 'Time', 'Level', 'Name', 'Error', 'StackTrace']
+    ]);
+    await file.writeAsString('$csvData\n', mode: FileMode.append);
+  }
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
@@ -102,18 +113,16 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
 
   Future<void> _logRecord(LogRecord record, String name) async {
     final file = await _getLocalFile(name);
-    final contents = '''
-    Message: ${record.message}
-    Time: ${record.time}
-    Level: ${record.level.value}
-    Name: ${record.loggerName}
-    Error: ${record.error}
-    StackTrace: ${record.stackTrace}
-
-    ----------------------------------
-
-    ''';
-    await file.writeAsString(contents, mode: FileMode.append);
+    String csvData = ListToCsvConverter().convert([
+      [
+        record.message,
+        record.time,
+        record.level.value,
+        record.error,
+        record.stackTrace
+      ]
+    ]);
+    await file.writeAsString('$csvData\n', mode: FileMode.append);
   }
 
   Future<File> _getLocalFile(String name) async {
@@ -136,7 +145,7 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
 
     files.sort((a, b) => b.path.compareTo(a.path));
     //Remove old files
-    while (files.length > 2) {
+    while (files.length > 3) {
       await files.last.delete();
       files.removeLast();
     }
