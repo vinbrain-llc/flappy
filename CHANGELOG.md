@@ -1,3 +1,7 @@
+## [0.1.3] - 28/04/2021
+
+- Bug fix: Enable logging in release mode.
+
 ## [0.1.2] - 28/04/2021
 
 - Bug fix: Fix writing CSV on the same row.

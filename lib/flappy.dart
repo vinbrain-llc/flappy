@@ -14,17 +14,21 @@ import 'package:path/path.dart' as p;
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:path_provider/path_provider.dart';
 
+const _1MB = 1000000;
+
 class FlappyFeedback extends StatefulWidget {
   final Widget child;
   final String? appName;
   final List<String>? receiverEmails;
   final int maximumFileSize;
+  final bool consoleLog;
 
   FlappyFeedback({
     required this.child,
     this.appName,
     this.receiverEmails,
-    this.maximumFileSize = 1000000,
+    this.maximumFileSize = _1MB,
+    this.consoleLog = false,
   });
 
   @override
@@ -78,7 +82,6 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
     var fileName = DateTime.now().millisecondsSinceEpoch.toString();
     _prepareFiles();
     _setupFirstRow(fileName);
-    Logger.root.level = kDebugMode ? Level.ALL : Level.OFF;
     hierarchicalLoggingEnabled = true;
     Logger.root.onRecord.listen((record) async {
       final file = await _getLocalFile(fileName);
@@ -87,14 +90,16 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
         _setupFirstRow(fileName);
       }
       await _logRecord(record, fileName);
-      log(
-        record.message,
-        time: record.time,
-        level: record.level.value,
-        name: record.loggerName,
-        error: record.error,
-        stackTrace: record.stackTrace,
-      );
+      if (widget.consoleLog) {
+        log(
+          record.message,
+          time: record.time,
+          level: record.level.value,
+          name: record.loggerName,
+          error: record.error,
+          stackTrace: record.stackTrace,
+        );
+      }
     });
   }
 
