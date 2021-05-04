@@ -81,10 +81,15 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
     _prepareFiles();
     var fileName = await _getLatestFile();
     hierarchicalLoggingEnabled = true;
+
+    Logger.root.level = widget.consoleLog ? Level.ALL : Level.OFF;
+
     Logger.root.onRecord.listen((record) async {
       final file = await _getLocalFile(fileName);
+
       if (await file.length() > widget.maximumFileSize) {
-        fileName = await _getLatestFile();
+        fileName = await _getLatestFile(newFile: true);
+        _prepareFiles();
       }
       await _logRecord(record, fileName);
       if (widget.consoleLog) {
@@ -100,7 +105,7 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
     });
   }
 
-  Future<String> _getLatestFile() async {
+  Future<String> _getLatestFile({bool newFile = false}) async {
     final localPath = await _localPath;
     final dir = Directory('$localPath/logs');
     var dirExist = await dir.exists();
@@ -110,7 +115,7 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
     final files = await dir.list().toList();
     var name = '';
 
-    if (files.isNotEmpty) {
+    if (files.isNotEmpty && !newFile) {
       files.sort((a, b) => b.path.compareTo(a.path));
       name = p.basename(files.first.path);
     } else {
@@ -142,7 +147,8 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
       [
         record.message,
         record.time,
-        record.level.value,
+        record.level.name,
+        record.loggerName,
         record.error,
         record.stackTrace
       ]
@@ -152,7 +158,7 @@ class _FlappyFeedbackState extends State<FlappyFeedback> {
 
   Future<File> _getLocalFile(String name) async {
     final path = await _localPath;
-    final file = File('$path/logs/$name.csv');
+    final file = File('$path/logs/$name');
     if (!await file.exists()) {
       await file.create();
     }
