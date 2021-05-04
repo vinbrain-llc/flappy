@@ -1,3 +1,7 @@
+## [0.1.5] - 28/04/2021
+
+- Bug fix: Fix various logging problems.
+
 ## [0.1.4] - 28/04/2021
 
 - Enhancement: Reuse file when not reaching maximum size.
